@@ -1,0 +1,5 @@
+pymupdf
+scikit-learn
+openai  # optional, only needed if using OpenAI or Ollama
+pandas  # required for eval script
+python-dotenv  # optional, load environment variables from .env
