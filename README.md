@@ -178,5 +178,3 @@ python app.py --question "What temperature goal is stated in the Paris Agreement
 
 **Nivesara Tirupati**
 - 🎓 Data Scientist | NLP & ML | Climate Tech | Policy Innovation
-- 🔗 [LinkedIn](YOUR_LINKEDIN_URL)
-- 🐙 [GitHub](https://github.com/YOUR_GITHUB_USERNAME)
