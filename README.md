@@ -1,68 +1,182 @@
-# Climate Policy Explainer Bot
+# 🌍 Climate Policy Q&A Bot
 
-This project provides a simple retrieval‑augmented chatbot focused on climate policy.  
-It ingests a small set of policy documents (PDFs) such as the IPCC AR6 summary, the Paris Agreement, UNEP Emissions Gap reports and related briefings, indexes them locally, and answers questions using only the information contained in those documents.  
+A **Retrieval-Augmented Generation (RAG)** chatbot that answers complex **climate policy and sustainability questions** using authoritative global documents such as:
 
-The pipeline is intentionally lightweight so it can run on a laptop without a GPU.  It uses Python built‑ins and `scikit‑learn` for vector search.  For answer generation you can plug in any OpenAI‑compatible LLM; the supplied code includes a placeholder for calling OpenAI's chat completions API.  If you run locally with a provider such as [Ollama](https://ollama.ai/), set the appropriate environment variables as described below.
+- The **Paris Agreement (UNFCCC)**
+- **IPCC Synthesis Reports**
+- **UNFCCC CMA reports**
+- **EU Fit-for-55 Policy Briefings**
+- **UNEP Emissions Gap Report 2024**
 
-## Quick start
+This project runs **entirely locally** using **Llama 3 (8B)** through **Ollama**, requiring no API keys or cloud dependencies.
 
-1. **Install dependencies** (Python ≥ 3.9 recommended):
+---
+*(This is where you should put your `demo.gif` file)*
+![Climate Bot Demo](screenshots/demo.gif)
+---
 
+## 📖 Table of Contents
+- [Overview](#-overview)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [Setup & Installation](#-setup--installation)
+- [Usage](#-usage)
+- [Project Files](#-project-files)
+- [Future Enhancements](#-future-enhancements)
+- [Author](#-author)
+
+---
+
+## 🧩 Overview
+
+The **Climate Policy Q&A Bot** enables users to ask natural-language questions about climate policy, international agreements, or sustainability goals, and receive **context-grounded answers** based on official reports.
+
+It’s built using **Retrieval-Augmented Generation (RAG)** — a combination of **semantic search** and **local LLM inference**.
+
+💡 **Use Case Examples:**
+- Policy analysts checking updates on national NDCs
+- Students researching the Paris Agreement
+- NGOs summarizing IPCC findings
+- Journalists verifying facts on global climate targets
+
+---
+
+## ⚙️ Features
+
+✅ Answers grounded in real, official climate policy documents
+✅ Local model inference via **Ollama + Llama 3 (8B)**
+✅ Lightweight Retrieval-Augmented Generation pipeline
+✅ Cites sources (with PDF page references) for verifiability
+✅ Multiple AI personas: `plain`, `policy`, `journalist`
+✅ Interactive chat UI built with **Streamlit**
+✅ No external API costs or internet dependence
+
+---
+
+## 🧠 Architecture
+
+The diagram below illustrates the RAG data flow, from document ingestion to answer generation.
+
+```plaintext
+      ┌──────────────────────────┐
+      │  PDF Climate Reports     │
+      └────────────┬─────────────┘
+                   │
+           (ingest.py: Text Extraction & Chunking)
+                   │
+                   ▼
+      ┌──────────────────────────┐
+      │  TF-IDF Vector Index     │
+      │  (Scikit-learn)          │
+      └────────────┬─────────────┘
+                   │
+           (app.py: Cosine Similarity Search)
+                   │
+                   ▼
+      ┌──────────────────────────┐
+      │  Context + Query → LLM   │
+      │  (Llama 3 via Ollama)    │
+      └──────────────────────────┘
+```
+
+---
+
+## 💻 Tech Stack
+
+| Component         | Technology / Library                                       |
+| ----------------- | ---------------------------------------------------------- |
+| **Language** | Python 3.9+                                                |
+| **LLM Backend** | Llama 3 (8B) via **Ollama** |
+| **Retrieval** | TF-IDF with **Scikit-Learn** |
+| **Interface** | **Streamlit** |
+| **Doc Parsing** | **PyMuPDF** |
+| **Environment** | venv / virtualenv                                          |
+
+---
+
+## 🧰 Setup & Installation
+
+#### 1️⃣ Clone the Repository
+```bash
+git clone [https://github.com/YOUR_USERNAME/climate-policy-rag-bot.git](https://github.com/YOUR_USERNAME/climate-policy-rag-bot.git)
+cd climate-policy-rag-bot
+```
+
+#### 2️⃣ Create and Activate a Virtual Environment
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+```
+
+#### 3️⃣ Install Dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-2. **Add your climate PDFs** into the `docs/` folder.  Five example files (IPCC AR6 SPM, Paris Agreement, UNEP Emissions Gap Report 2024, EU Fit for 55 briefing and CMA 2023 NDC synthesis) are included.  You can drop additional PDF or plain‑text files into this directory and they will be indexed.
-
-3. **Ingest documents** to build the search index.  Run:
-
-```bash
-python ingest.py
-```
-
-This extracts text from each PDF, splits it into overlapping chunks, computes TF‑IDF vectors and stores them in `index.pkl`.  Re‑run the script if you add new documents.
-
-4. **Ask questions** about your documents with:
+#### 4️⃣ Install and Run Ollama
+Follow the instructions on [ollama.ai](https://ollama.ai/) to install Ollama. Then, pull the Llama 3 model and start the server.
 
 ```bash
-python app.py --question "What temperature goal is stated in the Paris Agreement?"
+# Pull the model
+ollama pull llama3:8b
+
+# Run the server (keep this terminal open)
+ollama serve
 ```
 
-The script retrieves the most relevant chunks, optionally summarizes them via OpenAI, and prints an answer with citations.
+#### 5️⃣ Configure Environment Variables
+Create a `.env` file in the project root and add the following:
+```env
+OPENAI_API_KEY="ollama"
+OPENAI_BASE_URL="http://localhost:11434/v1"
+LLM_MODEL="llama3:8b"
+```
 
-## Environment variables
+---
 
-To enable answer generation via an LLM, set the following variables in your shell or a `.env` file:
+## 🚀 Usage
 
-- `OPENAI_API_KEY` – your OpenAI key or the placeholder `ollama` when using an OpenAI‑compatible local server (e.g., via [Ollama](https://ollama.ai/)).
-- `OPENAI_BASE_URL` – override to point to a local OpenAI‑compatible server (for Ollama: `http://localhost:11434/v1`).  Leave unset to use OpenAI's cloud API.
-- `LLM_MODEL` – model name to request (e.g. `gpt-3.5-turbo` for OpenAI; `llama3:8b` for Ollama).  Ignored if no key is set.
-- `MAX_TOKENS` – maximum tokens to generate; default 256.
+#### 🖥️ Streamlit Mode (Recommended)
+Run the Streamlit application for an interactive chat interface.
 
-If `OPENAI_API_KEY` is not set, the app simply returns the retrieved context paragraphs as the answer.
+```bash
+streamlit run app.py
+```
 
-## Files
+#### 🧭 CLI Mode
+Alternatively, you can ask a single question directly from the terminal:
 
-| File | Purpose |
-| --- | --- |
-| `ingest.py` | Parses PDFs in `docs/`, splits them into chunks and builds a TF‑IDF vector index. |
-| `app.py` | CLI tool that loads the index, retrieves the top‑k chunks for a question, optionally calls an LLM to summarize, and prints the answer with citations. |
-| `eval.py` | Mini evaluation harness for your own question/answer pairs; writes results to `eval_results.csv`. |
-| `requirements.txt` | Python dependencies; includes `scikit‑learn`, `pymupdf` and optional `openai` for LLM calls. |
+```bash
+python app.py --question "What temperature goal is stated in the Paris Agreement?" --persona plain
+```
 
-## Extending the project
+---
 
-* **Reranker:** The retrieval in this starter uses TF‑IDF cosine similarity.  To improve quality, you can add a cross‑encoder reranker (e.g. `sentence-transformers`' MiniLM) to reorder the top‑k passages.  Simply import the model in `app.py` and call it on the candidate snippets.
+## 📂 Project Files
 
-* **Persona control:** Modify the `build_prompt` function in `app.py` to prepend a persona‐specific system message (e.g. Plain English vs Policy‑maker), and expose a command‑line flag to switch personas.
+| File               | Description                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `app.py`           | The main Streamlit web application that provides the chat interface and runs the RAG pipeline.       |
+| `ingest.py`        | Parses PDFs, splits them into chunks, and builds the TF-IDF vector index (`index.pkl`).              |
+| `eval.py`          | A script to evaluate the chatbot's performance on a custom set of question-answer pairs.            |
+| `requirements.txt` | Lists the Python dependencies for the project.                                                 |
+| `docs/`            | A directory to store the source PDF and text documents for the chatbot's knowledge base.                        |
 
-* **Streamlit UI:** Build a simple Streamlit interface that calls the same retrieval code so non‑technical users can chat with the bot.  The skeleton here is CLI‑only for simplicity.
+---
 
-* **Evaluation:** Use `eval.py` to automatically test your bot on a set of questions.  Provide a CSV file with columns `question` and `gold` (gold standard answer).  The script will compute a simple F1‑like token overlap score and record latency and retrieved sources.
+## 🔮 Future Enhancements
 
-## License
+- **Vector Database**: Replace the pickled index with **ChromaDB** or **FAISS** for more scalable vector storage and retrieval.
+- **Reranking**: Integrate a **Cross-Encoder** model to re-rank the search results for improved relevance before sending them to the LLM.
+- **Deployment**: Package the application in a **Docker** container and deploy it on **Hugging Face Spaces** or Streamlit Cloud.
+- **Evaluation Dashboard**: Build a Streamlit dashboard to visualize the results from `eval.py` and track performance changes.
 
-This project is released under the MIT License.  The included documents are public, but be sure to respect their original copyrights when distributing.
+---
+
+## 👩‍💻 Author
+
+**Nivesara Tirupati**
+- 🎓 Data Scientist | NLP & ML | Climate Tech | Policy Innovation
+- 🔗 [LinkedIn](YOUR_LINKEDIN_URL)
+- 🐙 [GitHub](https://github.com/YOUR_GITHUB_USERNAME)
